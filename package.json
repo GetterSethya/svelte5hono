@@ -1,0 +1,22 @@
+{
+	"name": "_svelte5hono",
+	"type": "module",
+	"scripts": {
+		"dev": "tsx watch src/main.ts",
+		"generate": "npx drizzle-kit generate",
+		"migrate": "npx drizzle-kit migrate"
+	},
+	"dependencies": {
+		"@hono/node-server": "^1.13.8",
+		"better-sqlite3": "^11.8.1",
+		"dotenv": "^16.4.7",
+		"drizzle-orm": "^0.39.2",
+		"hono": "^4.6.20"
+	},
+	"devDependencies": {
+		"@types/better-sqlite3": "^7.6.12",
+		"@types/node": "^20.11.17",
+		"drizzle-kit": "^0.30.4",
+		"tsx": "^4.7.1"
+	}
+}
