@@ -8,10 +8,14 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "^1.13.8",
+		"@hono/zod-validator": "^0.4.2",
+		"@node-rs/argon2": "^2.0.2",
 		"better-sqlite3": "^11.8.1",
 		"dotenv": "^16.4.7",
 		"drizzle-orm": "^0.39.2",
-		"hono": "^4.6.20"
+		"hono": "^4.6.20",
+		"jose": "^5.9.6",
+		"zod": "^3.24.2"
 	},
 	"devDependencies": {
 		"@types/better-sqlite3": "^7.6.12",
