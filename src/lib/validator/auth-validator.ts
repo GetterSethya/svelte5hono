@@ -10,10 +10,10 @@ export const registerValidator = z
 			.min(1, { message: 'name cant be blank' }),
 		password: z
 			.string({ message: 'password cant be blank' })
-			.min(8, { message: 'Password is too short' }),
+			.min(8, { message: 'password is too short' }),
 		passwordConfirm: z
 			.string({ message: 'password confirm cant be blank' })
-			.min(8, { message: 'Password confirm is too short' }),
+			.min(8, { message: 'password confirm is too short' }),
 	})
 	.refine(
 		(ctx) => {
@@ -29,7 +29,7 @@ export const loginValidator = z.object({
 		.email({ message: 'email is invalid' }),
 	password: z
 		.string({ message: 'password cant be blank' })
-		.min(8, { message: 'Password is too short' }),
+		.min(8, { message: 'password is too short' }),
 })
 
 export const jwtRefreshValidator = z.object({

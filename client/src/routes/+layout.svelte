@@ -1,6 +1,24 @@
 <script lang="ts">
+	import { Client } from '@/client';
 	import '../app.css';
+	import { browser } from '$app/environment';
+	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+	import { Toaster } from '@/components/ui/sonner';
+
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: {
+				enabled: browser
+			}
+		}
+	});
+
+	Client.setCtx();
+
 	let { children } = $props();
 </script>
 
-{@render children()}
+<QueryClientProvider client={queryClient}>
+    <Toaster richColors/>
+	{@render children()}
+</QueryClientProvider>
