@@ -57,52 +57,45 @@ export const authController = new Hono()
 			return appResponse(c, 'something went wrong', 500, null)
 		}
 	})
-	.post(
-		'/refresh',
-		jwtMiddleware,
-		appValidator('form', jwtRefreshValidator),
-		async (c) => {
-			const form = c.req.valid('form')
-			try {
-				const jwtClaims = JWT.decode(form.refreshToken)
-				if (!jwtClaims.sub)
-					return appResponse(c, 'invalid refresh token', 400, null)
-
-				const userId = z.coerce.number().parse(jwtClaims.sub)
-				const auth = await authRepo.findByUser({ userId })
-				if (!auth)
-					return appResponse(c, 'invalid refresh token', 400, null)
-
-				if (auth.refresh_token === form.refreshToken) {
-					const { JWT_REFRESH_SECRET, JWT_ACCESS_SECRET } =
-						env<ENV>(c)
-					const jwt = new JWT(JWT_ACCESS_SECRET, JWT_REFRESH_SECRET)
-					const accessToken = await jwt.createAccess(userId)
-					const refreshToken = await jwt.createRefresh(userId)
-
-					await authRepo.update({
-						id: auth.id,
-						userId,
-						item: { ...auth, refresh_token: refreshToken },
-					})
-
-					return appResponse(c, 'success', 200, {
-						access_token: accessToken,
-						refresh_token: refreshToken,
-					})
-				}
-
+	.post('/refresh', appValidator('form', jwtRefreshValidator), async (c) => {
+		const form = c.req.valid('form')
+		try {
+			const jwtClaims = JWT.decode(form.refreshToken)
+			if (!jwtClaims.sub)
 				return appResponse(c, 'invalid refresh token', 400, null)
-			} catch (error) {
-				console.error(error)
-				if (error instanceof ErrorRepository) {
-					return appResponse(c, error.message, error.status, null)
-				}
 
-				return appResponse(c, 'something went wrong', 500, null)
+			const userId = z.coerce.number().parse(jwtClaims.sub)
+			const auth = await authRepo.findByUser({ userId })
+			if (!auth) return appResponse(c, 'invalid refresh token', 400, null)
+
+			if (auth.refresh_token === form.refreshToken) {
+				const { JWT_REFRESH_SECRET, JWT_ACCESS_SECRET } = env<ENV>(c)
+				const jwt = new JWT(JWT_ACCESS_SECRET, JWT_REFRESH_SECRET)
+				const accessToken = await jwt.createAccess(userId)
+				const refreshToken = await jwt.createRefresh(userId)
+
+				await authRepo.update({
+					id: auth.id,
+					userId,
+					item: { ...auth, refresh_token: refreshToken },
+				})
+
+				return appResponse(c, 'success', 200, {
+					access_token: accessToken,
+					refresh_token: refreshToken,
+				})
 			}
+
+			return appResponse(c, 'invalid refresh token', 400, null)
+		} catch (error) {
+			console.error(error)
+			if (error instanceof ErrorRepository) {
+				return appResponse(c, error.message, error.status, null)
+			}
+
+			return appResponse(c, 'something went wrong', 500, null)
 		}
-	)
+	})
 	.post('/logout', jwtMiddleware, async (c) => {
 		const userRepo = new UserRepository()
 		try {

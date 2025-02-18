@@ -3,7 +3,7 @@
 	import { Client } from '@/client';
 	import * as Form from '@/components/ui/form';
 	import { Input } from '@/components/ui/input';
-	import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/constant';
+	import { JWT } from '@/jwt';
 	import { loginMutation } from '@/mutation/login';
 	import { loginValidator } from '@root/lib/validator/auth-validator';
 	import { toast } from 'svelte-sonner';
@@ -28,8 +28,8 @@
 			if (fd.valid) {
 				$mutation.mutate(fd.data, {
 					onSuccess: ({access_token,refresh_token}) => {
-						localStorage.setItem(ACCESS_TOKEN,access_token);
-						localStorage.setItem(REFRESH_TOKEN,refresh_token);
+						localStorage.setItem(JWT.ACCESS_TOKEN,access_token);
+						localStorage.setItem(JWT.REFRESH_TOKEN,refresh_token);
 						toast.success('Login success');
 						goto('/');
 					}

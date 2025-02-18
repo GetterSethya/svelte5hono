@@ -15,3 +15,4 @@ export class ResponseError<Result extends unknown> extends Error {
         this.status=status
     }
 }
+export class AuthenticationError extends Error{}

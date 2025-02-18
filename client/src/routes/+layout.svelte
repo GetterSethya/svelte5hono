@@ -4,6 +4,7 @@
 	import { browser } from '$app/environment';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import { Toaster } from '@/components/ui/sonner';
+	import { ModeWatcher } from 'mode-watcher';
 
 	const queryClient = new QueryClient({
 		defaultOptions: {
@@ -19,6 +20,7 @@
 </script>
 
 <QueryClientProvider client={queryClient}>
-    <Toaster richColors/>
+	<ModeWatcher />
+	<Toaster richColors />
 	{@render children()}
 </QueryClientProvider>

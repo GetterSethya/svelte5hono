@@ -1,17 +1,19 @@
-import { ACCESS_TOKEN } from "@/constant";
 import type { LayoutLoad } from "./$types";
 import { goto } from "$app/navigation";
 import { Client } from "@/client";
+import { JWT } from "@/jwt";
+import { appFetch } from "@/appFetch";
 
-export const load:LayoutLoad = async()=>{
-    const accessToken = localStorage.getItem(ACCESS_TOKEN)
+export const load:LayoutLoad = async({fetch})=>{
+    const accessToken = localStorage.getItem(JWT.ACCESS_TOKEN)
     if (!accessToken) {
         goto("/login")
         return
     }
 
     const currentUser = await Client.value.user.current_user.$get(undefined,{
-        init:{headers:{Authorization:accessToken}}
+        init:{headers:{Authorization:accessToken}},
+        fetch:(input:URL|RequestInfo,init?:RequestInit|undefined)=> appFetch(input,init,fetch)
     })
 
     const resData = await currentUser.json()

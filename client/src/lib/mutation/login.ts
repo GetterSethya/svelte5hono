@@ -9,7 +9,7 @@ export const loginMutation = (client:ReturnType<typeof Client.getCtx>)=>createMu
     mutationFn:async(data:z.infer<typeof loginValidator>)=>{
         const response = await client.authentication.login.$post({
             form: data
-        })
+        },)
 
         const resData = await response.json()
 

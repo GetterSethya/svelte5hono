@@ -7,7 +7,7 @@ export class JWT {
 	static alg = 'HS256'
 	static issuer = 'svelte5hono'
 	static audience = 'urn:svelte5hono:audience'
-	static accessExp = '6h'
+	static accessExp = '10s'
 	static refreshExp = '7d'
 
 	constructor(accessSecret: string, refreshSecret: string) {
