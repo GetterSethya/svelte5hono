@@ -1,18 +1,18 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
 export class ResponseError<Result extends unknown> extends Error {
-    status:number;
-    results:Result;
+	status: number;
+	results: Result;
 
-    constructor(status:number,results:Result,message:string){
-        super(message)
-        this.results=results
-        this.status=status
-    }
+	constructor(status: number, results: Result, message: string) {
+		super(message);
+		this.results = results;
+		this.status = status;
+	}
 }
-export class AuthenticationError extends Error{}
+export class AuthenticationError extends Error {}

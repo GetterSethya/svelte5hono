@@ -4,12 +4,15 @@ import { Hono } from 'hono'
 import { userController } from './lib/controller/user-controller.js'
 import { authController } from './lib/controller/auth-controller.js'
 import 'dotenv/config'
+import { companyController } from './lib/controller/company-controller.js'
 
 const api = new Hono()
 	// /api/user
 	.route('/user', userController)
 	// /api/auth
 	.route('/auth', authController)
+	// /api/company
+	.route('/company', companyController)
 
 const app = new Hono()
 	//

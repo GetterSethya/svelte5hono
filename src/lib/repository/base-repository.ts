@@ -1,4 +1,5 @@
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import type { OrderQuery } from '../constant.js'
 
 export interface AsyncBaseRepository<Model> {
 	create(args: CreateArgs<Model>): Promise<Model>
@@ -32,7 +33,6 @@ export type ListArgs = {
 	[key: string]: any
 }
 
-export type OrderQuery = 'ASC' | 'DESC'
 
 export type UpdateArgs<Model> = {
 	id: number

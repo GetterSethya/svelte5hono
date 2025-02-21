@@ -16,3 +16,8 @@ export const APPLICATION_STATUS: Record<
 	interview: 'Interview',
 	reply: 'Dibalas',
 }
+
+export const LIMIT = 10
+export const SORT = 'created_at'
+export type OrderQuery = 'ASC' | 'DESC'
+export const ORDER: OrderQuery = 'DESC'
