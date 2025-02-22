@@ -41,6 +41,7 @@
 		"zod": "^3.24.2"
 	},
 	"dependencies": {
-		"@tanstack/svelte-query": "^5.66.0"
+		"@tanstack/svelte-query": "^5.66.0",
+		"@tanstack/table-core": "^8.21.2"
 	}
 }

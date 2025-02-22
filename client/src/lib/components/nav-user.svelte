@@ -1,3 +1,7 @@
+<script lang="ts" module>
+	export { UserAvatar };
+</script>
+
 <script lang="ts">
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
@@ -13,12 +17,24 @@
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import { buttonVariants } from './ui/button';
+	import { LocalUser } from '@/local-user';
+	import { type UserEntity } from '@root/lib/repository/user-repository';
 
-	let { user }: { user: { name: string; email: string; avatar: string } } = $props();
 	const sidebar = useSidebar();
 	const client = Client.getCtx();
 	const mutation = logoutMutation(client);
+	const user = LocalUser.getCtx();
 </script>
+
+{#snippet UserAvatar({ user }: { user: UserEntity })}
+	<Avatar.Root class="h-8 w-8 rounded-lg">
+		<Avatar.Fallback class="rounded-lg">{user.name.substring(0, 2)}</Avatar.Fallback>
+	</Avatar.Root>
+	<div class="grid flex-1 text-left text-sm leading-tight">
+		<span class="truncate font-semibold">{user.name}</span>
+		<span class="truncate text-xs">{user.email}</span>
+	</div>
+{/snippet}
 
 <Sidebar.Menu>
 	<Sidebar.MenuItem>
@@ -30,14 +46,7 @@
 						class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 						{...props}
 					>
-						<Avatar.Root class="h-8 w-8 rounded-lg">
-							<Avatar.Image src={user.avatar} alt={user.name} />
-							<Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
-						</Avatar.Root>
-						<div class="grid flex-1 text-left text-sm leading-tight">
-							<span class="truncate font-semibold">{user.name}</span>
-							<span class="truncate text-xs">{user.email}</span>
-						</div>
+						{@render UserAvatar({ user: $user })}
 						<ChevronsUpDown class="ml-auto size-4" />
 					</Sidebar.MenuButton>
 				{/snippet}
@@ -50,14 +59,7 @@
 			>
 				<DropdownMenu.Label class="p-0 font-normal">
 					<div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-						<Avatar.Root class="h-8 w-8 rounded-lg">
-							<Avatar.Image src={user.avatar} alt={user.name} />
-							<Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
-						</Avatar.Root>
-						<div class="grid flex-1 text-left text-sm leading-tight">
-							<span class="truncate font-semibold">{user.name}</span>
-							<span class="truncate text-xs">{user.email}</span>
-						</div>
+						{@render UserAvatar({ user: $user })}
 					</div>
 				</DropdownMenu.Label>
 				<DropdownMenu.Separator />
@@ -85,7 +87,11 @@
 				</DropdownMenu.Group>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item
-					class={buttonVariants({ size: 'sm', variant: 'destructive', class: 'cursor-pointer w-full' })}
+					class={buttonVariants({
+						size: 'sm',
+						variant: 'destructive',
+						class: 'w-full cursor-pointer'
+					})}
 					disabled={$mutation.isPending}
 					onclick={() => {
 						$mutation.mutate(undefined, {
