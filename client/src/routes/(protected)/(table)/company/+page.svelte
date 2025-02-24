@@ -1,25 +1,51 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { appFetch } from '@/appFetch';
 	import { Client } from '@/client';
 	import { Button } from '@/components/ui/button';
-	import DataTable, { type TableActions } from '@/components/ui/data-table/data-table.svelte';
+	import DataTable, {
+		type TableActions,
+		type TableBulkbar
+	} from '@/components/ui/data-table/data-table.svelte';
 	import { JWT } from '@/jwt';
 	import type { CompanyEntity } from '@root/lib/repository/company-repository';
-	import { createQuery } from '@tanstack/svelte-query';
-	import type { ColumnDef } from '@tanstack/table-core';
+	import { createMutation, createQuery } from '@tanstack/svelte-query';
+	import type { ColumnDef, Row } from '@tanstack/table-core';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
 	import { renderComponent } from '@/components/ui/data-table';
 	import Checkbox from '@/components/ui/checkbox/checkbox.svelte';
+	import Search from '@/components/ui/queryable/search.svelte';
+	import { PlusIcon } from 'lucide-svelte';
+	import { ICON_SIZE } from '@/constant';
+	import Limit from '@/components/ui/queryable/limit.svelte';
+	import Pagination from '@/components/ui/queryable/pagination.svelte';
+	import { SearchParams } from '@/hooks/search-params';
+	import Sort from '@/components/ui/queryable/sort.svelte';
+	import DateCompact from '@/components/ui/cell/date-compact.svelte';
+	import { toast } from 'svelte-sonner';
 
 	const client = Client.getCtx();
+	const searchParams = new SearchParams();
 
 	const companyQuery = createQuery({
-		queryKey: ['company-table'],
+		queryKey: [
+			'company-table',
+			searchParams.page,
+			searchParams.limit,
+			searchParams.sort,
+			searchParams.order,
+			searchParams.search
+		],
 		queryFn: async () => {
 			const response = await client.company.index.$get(
 				{
-					query: {}
+					query: {
+						page: searchParams.page.toString(),
+						limit: searchParams.limit.toString(),
+						sort: searchParams.sort,
+						order: searchParams.order,
+						q: searchParams.search
+					}
 				},
 				{
 					fetch: appFetch,
@@ -30,8 +56,6 @@
 			return response.json();
 		}
 	});
-
-	const idDateFormat = Intl.DateTimeFormat('id-ID');
 
 	const columns: ColumnDef<CompanyEntity>[] = [
 		{
@@ -54,20 +78,32 @@
 		},
 		{
 			accessorKey: 'name',
-			header: 'Company Name',
+			header: () =>
+				renderComponent(Sort, {
+					key: 'name',
+					value: 'Name'
+				}),
 			enableHiding: false
 		},
 		{
 			accessorKey: 'updated_at',
-			header: 'Updated',
-			cell: ({ row }) => idDateFormat.format(row.original.updated_at),
+			header: () =>
+				renderComponent(Sort, {
+					key: 'updated_at',
+					value: 'Updated'
+				}),
+			cell: ({ row }) => renderComponent(DateCompact, { dateString: row.original.updated_at }),
 			size: 1,
 			enableHiding: true
 		},
 		{
 			accessorKey: 'created_at',
-			header: 'Created',
-			cell: ({ row }) => idDateFormat.format(row.original.created_at),
+			header: () =>
+				renderComponent(Sort, {
+					key: 'created_at',
+					value: 'Created'
+				}),
+			cell: ({ row }) => renderComponent(DateCompact, { dateString: row.original.created_at }),
 			size: 1,
 			enableHiding: true
 		},
@@ -79,9 +115,47 @@
 		}
 	];
 
+	const bulkbarMutation = createMutation({
+		mutationFn: async (data: Row<CompanyEntity>[]) => {
+			for (const company of data.map((d) => d.original)) {
+				await client.company.id[':id'].$delete(
+					{
+						param: { id: company.id.toString() }
+					},
+					{
+						init: { headers: { Authorization: JWT.access! } },
+						fetch: appFetch
+					}
+				);
+			}
+		},
+		onError: (error) => {
+			console.error(error);
+			toast.error('Error when deleting data');
+		}
+	});
+
 	const actions: TableActions<CompanyEntity> = {
 		content: Actions
 	};
+
+	const bulkbar: TableBulkbar<CompanyEntity> = {
+		onAction: (args) => {
+			args.isMutating(true);
+			$bulkbarMutation.mutate(args.data, {
+				onSuccess: () => {
+					$companyQuery.refetch();
+					toast.success('Company deleted successfully');
+				},
+				onSettled: () => {
+					args.isMutating(false);
+					args.table.resetRowSelection();
+				}
+			});
+		}
+	};
+
+	afterNavigate(() => $companyQuery.refetch());
 </script>
 
 {#snippet Actions(data: CompanyEntity)}
@@ -95,10 +169,22 @@
 	</DropdownMenu.Content>
 {/snippet}
 
-<Button onclick={() => goto('/company/upsert')}>Add Company</Button>
-{#if $companyQuery.data}
-	{@const companies = $companyQuery.data.result?.items}
-	{#if companies}
-		<DataTable data={companies} {actions} {columns} />
+<div class="flex flex-col gap-2.5">
+	<div class="flex w-full flex-row items-center justify-end gap-2.5">
+		<Search></Search>
+		<Button onclick={() => goto('/company/upsert')}>
+			<PlusIcon size={ICON_SIZE} />
+		</Button>
+	</div>
+
+	{#if $companyQuery.data}
+		{@const companies = $companyQuery.data.result?.items}
+		{#if companies}
+			<DataTable {bulkbar} data={companies} {actions} {columns} />
+		{/if}
+		<div class="flex flex-row justify-between">
+			<Limit totalItems={$companyQuery.data.result.meta.totalItems} />
+			<Pagination totalItems={$companyQuery.data.result.meta.totalItems} />
+		</div>
 	{/if}
-{/if}
+</div>

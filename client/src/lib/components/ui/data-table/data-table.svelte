@@ -2,14 +2,26 @@
 	export type TableActions<TData> = {
 		content: Snippet<[TData]>;
 	};
+
+	export type BulkbarArgs<TData> = {
+		data: Row<TData>[];
+		table: TTable<TData>;
+		isMutating: (value: boolean) => void;
+	};
+
+	export type TableBulkbar<TData> = {
+		onAction: (args: BulkbarArgs<TData>) => void;
+	};
 </script>
 
 <script lang="ts" generics="TData,TValue">
 	import {
 		getCoreRowModel,
 		type ColumnDef,
+		type Row,
 		type RowSelectionState,
-		type VisibilityState
+		type VisibilityState,
+		type Table as TTable
 	} from '@tanstack/table-core';
 	import { createSvelteTable } from '.';
 	import * as Table from '@/components/ui/table/';
@@ -17,20 +29,22 @@
 	import FlexRender from './flex-render.svelte';
 	import type { Snippet } from 'svelte';
 	import { Button } from '../button';
-	import { Ellipsis } from 'lucide-svelte';
+	import { Ellipsis, RefreshCwIcon } from 'lucide-svelte';
 	import { ICON_SIZE } from '@/constant';
-	import { cn } from '@/utils';
+	import { cn, flyAndScale } from '@/utils';
 
 	type DataTableProps<TData, TValue> = {
 		columns: ColumnDef<TData, TValue>[];
 		data: TData[];
 		actions: TableActions<TData>;
+		bulkbar?: TableBulkbar<TData>;
 	};
 
-	let { data, columns, actions }: DataTableProps<TData, TValue> = $props();
+	let { data, columns, actions, bulkbar }: DataTableProps<TData, TValue> = $props();
 
 	let columnVisibility = $state<VisibilityState>({});
 	let rowSelection = $state<RowSelectionState>({});
+	let isMutating = $state(false);
 
 	const table = createSvelteTable({
 		get data() {
@@ -143,10 +157,51 @@
 		</Table.Body>
 	</Table.Root>
 </div>
-<pre>
-    {JSON.stringify(
-		table.getFilteredSelectedRowModel().rows.map((row) => row.original),
-		null,
-		2
-	)}
-</pre>
+{#if bulkbar && table.getFilteredSelectedRowModel().rows.length > 0}
+	<div
+		transition:flyAndScale
+		class="fixed bottom-[10%] flex flex-1 flex-row items-center justify-center self-center text-sm"
+	>
+		<div
+			class="flex w-[50vw] flex-row rounded-lg border border-foreground/20 bg-muted p-2.5
+text-muted-foreground shadow-sm max-sm:w-[80vw] lg:w-[40vw]"
+		>
+			<div class="flex w-1/2 flex-row items-center gap-1">
+				<span class="text-nowrap">
+					{table.getFilteredSelectedRowModel().rows.length} of
+					{table.getFilteredRowModel().rows.length}
+					row(s) selected
+				</span>
+				<Button
+					disabled={isMutating}
+					onclick={() => table.resetRowSelection(true)}
+					size="sm"
+					variant="outline"
+				>
+					<RefreshCwIcon size={ICON_SIZE} />
+					Reset
+				</Button>
+			</div>
+			<div class="ms-auto flex w-fit lg:w-1/2">
+				<Button
+					onclick={() => {
+						const rows = table.getFilteredSelectedRowModel().rows;
+						bulkbar.onAction({
+							data: rows,
+							table,
+							isMutating: (value) => {
+								isMutating = value;
+							}
+						});
+					}}
+					disabled={isMutating}
+					size="sm"
+					variant="destructive"
+					class="ms-auto"
+				>
+					Delete
+				</Button>
+			</div>
+		</div>
+	</div>
+{/if}
