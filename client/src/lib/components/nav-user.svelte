@@ -19,6 +19,8 @@
 	import { buttonVariants } from './ui/button';
 	import { LocalUser } from '@/local-user';
 	import { type UserEntity } from '@root/lib/repository/user-repository';
+	import { UserIcon } from 'lucide-svelte';
+	import { ICON_SIZE } from '@/constant';
 
 	const sidebar = useSidebar();
 	const client = Client.getCtx();
@@ -64,6 +66,10 @@
 				</DropdownMenu.Label>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Group>
+					<DropdownMenu.Item onclick={()=>goto("/profile")}>
+						<UserIcon class="mr-2 size-4"/>
+						<span>Profile</span>
+					</DropdownMenu.Item>
 					<DropdownMenu.Sub>
 						<DropdownMenu.SubTrigger>
 							{#if $mode === 'dark'}

@@ -12,7 +12,7 @@
 	import { createMutation, createQuery } from '@tanstack/svelte-query';
 	import type { ColumnDef, Row } from '@tanstack/table-core';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
-	import { renderComponent } from '@/components/ui/data-table';
+	import { renderComponent, renderSnippet } from '@/components/ui/data-table';
 	import Checkbox from '@/components/ui/checkbox/checkbox.svelte';
 	import Search from '@/components/ui/queryable/search.svelte';
 	import { PlusIcon } from 'lucide-svelte';
@@ -54,7 +54,8 @@
 			);
 
 			return response.json();
-		}
+		},
+        staleTime:0
 	});
 
 	const columns: ColumnDef<CompanyEntity>[] = [
@@ -83,9 +84,11 @@
 					key: 'name',
 					value: 'Name'
 				}),
+			cell: ({ row }) => renderSnippet(NameCell, row.original.name),
 			enableHiding: false
 		},
 		{
+			id: 'Updated',
 			accessorKey: 'updated_at',
 			header: () =>
 				renderComponent(Sort, {
@@ -97,6 +100,7 @@
 			enableHiding: true
 		},
 		{
+			id: 'Created',
 			accessorKey: 'created_at',
 			header: () =>
 				renderComponent(Sort, {
@@ -157,6 +161,10 @@
 
 	afterNavigate(() => $companyQuery.refetch());
 </script>
+
+{#snippet NameCell(name: string)}
+	<span class="text-nowrap">{name}</span>
+{/snippet}
 
 {#snippet Actions(data: CompanyEntity)}
 	<DropdownMenu.Content side="left" align="start">

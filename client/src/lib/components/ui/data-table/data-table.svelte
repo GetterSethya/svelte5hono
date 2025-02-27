@@ -86,8 +86,13 @@
 			{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 				<Table.Row>
 					{#each headerGroup.headers as header (header.id)}
-						<Table.Head class={cn(header.column.getSize() === 1 ? 'w-1 text-nowrap' : '')}>
-							{#if header.id === 'actions'}
+						{#if header.id === 'actions'}
+							<Table.Head
+								class={cn([
+									header.column.getSize() === 1 ? 'w-1 text-nowrap' : '',
+									'sticky right-0 bg-background'
+								])}
+							>
 								<DropdownMenu.Root>
 									<DropdownMenu.Trigger>
 										{#snippet child({ props })}
@@ -107,19 +112,36 @@
 													{column.columnDef.header}
 												{/if}
 												{#if typeof column.columnDef.header === 'function'}
-													{column.columnDef.header(header.getContext())}
+													{column.columnDef.id}
 												{/if}
 											</DropdownMenu.CheckboxItem>
 										{/each}
 									</DropdownMenu.Content>
 								</DropdownMenu.Root>
-							{:else}
+							</Table.Head>
+						{:else if header.id === 'select'}
+							<Table.Head
+								class={cn([
+									header.column.getSize() === 1 ? 'w-1 text-nowrap' : '',
+									'sticky left-0 bg-background'
+								])}
+							>
+                                <div class="pe-4">
+
 								<FlexRender
 									content={header.column.columnDef.header}
 									context={header.getContext()}
 								/>
-							{/if}
-						</Table.Head>
+                                </div>
+                            </Table.Head>
+						{:else}
+							<Table.Head class={cn(header.column.getSize() === 1 ? 'w-1 text-nowrap' : '')}>
+								<FlexRender
+									content={header.column.columnDef.header}
+									context={header.getContext()}
+								/>
+							</Table.Head>
+						{/if}
 					{/each}
 				</Table.Row>
 			{/each}
@@ -129,7 +151,7 @@
 				<Table.Row data-state={row.getIsSelected() && 'selected'}>
 					{#each row.getVisibleCells() as cell (cell.id)}
 						{#if cell.column.id === 'actions'}
-							<Table.Cell class="w-1">
+							<Table.Cell class="sticky right-0 w-1 bg-background">
 								<DropdownMenu.Root>
 									<DropdownMenu.Trigger>
 										{#snippet child({ props })}
@@ -141,6 +163,15 @@
 									</DropdownMenu.Trigger>
 									{@render actions.content(cell.row.original)}
 								</DropdownMenu.Root>
+							</Table.Cell>
+						{:else if cell.column.id === 'select'}
+							<Table.Cell
+								class={cn([
+									cell.column.getSize() === 1 ? 'w-1' : '',
+									'sticky left-0 bg-background'
+								])}
+							>
+								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
 							</Table.Cell>
 						{:else}
 							<Table.Cell class={cell.column.getSize() === 1 ? 'w-1' : ''}>

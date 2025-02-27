@@ -13,8 +13,11 @@ export const upsertMutation = (client: ReturnType<typeof Client.getCtx>, id?: st
 			if (id) {
 				const response = await client.company.id[':id'].$patch({
 					param: { id },
-					form: { name: data.name, address: data.address || undefined }
-				});
+					form: { name: data.name, address: data.address || "" }
+				},{
+                        fetch:appFetch,
+                        init:{headers:{Authorization:JWT.access!}}
+                    });
 
 				const resData = await response.json();
 				if (response.status !== 200 || !resData.result) {
@@ -29,7 +32,7 @@ export const upsertMutation = (client: ReturnType<typeof Client.getCtx>, id?: st
 			}
 			const response = await client.company.index.$post(
 				{
-					form: { name: data.name, address: data.address || undefined }
+					form: { name: data.name, address: data.address || "" }
 				},
 				{
 					fetch: appFetch,

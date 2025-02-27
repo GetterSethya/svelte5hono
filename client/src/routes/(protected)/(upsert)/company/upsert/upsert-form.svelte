@@ -21,7 +21,7 @@
 	let { id, data }: UpsertFormProps = $props();
 
 	const client = Client.getCtx();
-	const upsertCompanyMutation = upsertMutation(client);
+	const upsertCompanyMutation = upsertMutation(client, id);
 	const upsertCompanyQuery = upsertQuery(client, id);
 
 	const form = superForm(data, {
