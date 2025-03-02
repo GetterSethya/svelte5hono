@@ -63,6 +63,7 @@ export const applicationTable = sqliteTable('applications', {
 	}),
 	position: text(),
 	status: text().notNull().$type<(typeof APPLICATION_STATUS_KEY)[number]>(),
+	notes: text(),
 })
 
 export type Application = typeof applicationTable.$inferSelect

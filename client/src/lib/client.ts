@@ -2,6 +2,7 @@ import { hc } from 'hono/client';
 import type { authController } from '@root/lib/controller/auth-controller';
 import type { userController } from '@root/lib/controller/user-controller';
 import type { companyController } from '@root/lib/controller/company-controller';
+import type { applicationController } from '@root/lib/controller/application-controller';
 import { getContext, setContext } from 'svelte';
 
 export class Client {
@@ -9,7 +10,8 @@ export class Client {
 	static readonly value = {
 		user: hc<typeof userController>('/api/user'),
 		authentication: hc<typeof authController>('/api/auth'),
-		company: hc<typeof companyController>('/api/company')
+		company: hc<typeof companyController>('/api/company'),
+        application:hc<typeof applicationController>("/api/application")
 	};
 
 	static setCtx() {
